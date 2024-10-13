@@ -1,12 +1,11 @@
-#include "wxmanager.h"
+#include "sources/wxm.h"
 
 #include <QApplication>
-#include <QSettings>
-#include <QDir>
 
-int main(int argc, char *argv[]) {
+int main(int argc, char *argv[])
+{
     QApplication a(argc, argv);
-    WxManager w;
+    Wxm w;
     w.show();
     return a.exec();
 }

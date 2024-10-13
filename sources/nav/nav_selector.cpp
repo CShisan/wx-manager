@@ -1,13 +1,19 @@
-#include "selector.h"
-#include "global.h"
-#include <windows.h>
-#include <QMessageBox>
-#include <QIcon>
+#include "nav_selector.h"
+#include "ui_nav_selector.h"
 
-Selector::Selector(QWidget *parent) : QLabel{parent} {
+#include <QIcon>
+#include <QMessageBox>
+
+NavSelector::NavSelector(QWidget *parent) : QLabel(parent) , ui(new Ui::NavSelector) {
+    ui->setupUi(this);
 }
 
-void Selector::mousePressEvent(QMouseEvent *event) {
+NavSelector::~NavSelector() {
+    delete ui;
+}
+
+
+void NavSelector::mousePressEvent(QMouseEvent *event) {
     if (event->button() == Qt::LeftButton) {
         qDebug() << "Mouse Pressed";
         // 开始拖动操作，显示准星
@@ -15,7 +21,7 @@ void Selector::mousePressEvent(QMouseEvent *event) {
     }
 }
 
-void Selector::mouseReleaseEvent(QMouseEvent *event) {
+void NavSelector::mouseReleaseEvent(QMouseEvent *event) {
     if (event->button() == Qt::LeftButton) {
         qDebug() << "Mouse Released";
         // 停止拖动操作，恢复正常鼠标样式
@@ -37,17 +43,12 @@ void Selector::mouseReleaseEvent(QMouseEvent *event) {
             return;
         }
 
-        CarrierSlot* current =  Global::curSlot();
-        if (current != nullptr) {
-            current->setHwnd(target);
-            emit selected(current);
-        }
-        // 把目标窗口嵌入到容器窗口中
+        emit this->signal_selected(target);
         qDebug() << "Target Window Found";
     }
 }
 
-bool Selector::isWechatWindow(HWND hwnd) {
+bool NavSelector::isWechatWindow(HWND hwnd) {
     if (IsWindow(hwnd)) {
         const int classNameSize = 256;
         TCHAR classNameArray[classNameSize];
