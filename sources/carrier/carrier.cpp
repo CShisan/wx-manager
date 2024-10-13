@@ -17,6 +17,9 @@ Carrier::~Carrier() {
 }
 
 void Carrier::slot_embed_cslot(QString uuid, HWND hwnd) {
+    if (this->slotMap.value(uuid, nullptr) != nullptr) {
+        return;
+    }
     QWindow *externalWindow = QWindow::fromWinId((WId) hwnd);
     QWidget *wechat = QFrame::createWindowContainer(externalWindow, this);
     this->layout()->addWidget(wechat);
