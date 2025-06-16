@@ -7,57 +7,64 @@
 #include <QDir>
 #include <QStandardPaths>
 #include <QThread>
+#include <aclapi.h>
 
 
-Wechat::Wechat(QObject *parent) : QObject{parent} {
+Wechat::Wechat(QObject * parent) : QObject {parent} {}
+
+// void Wechat::start(int count) {
+// Wechat::elevatePrivileges();
+// QThread *thread = QThread::create([](int count){
+// for (int i = 0; i < count; i++) {
+// QProcess *process = new QProcess();
+// process->start("starter/starter_anhkgg.exe");
+// process->waitForFinished();
+// process->deleteLater();
+// }
+// }, count);
+// thread->start();
+// }
+
+void Wechat::multiple() {
+    LPCWSTR mutexName = L"XWeChat_App_Instance_Identity_Mutex_Name";
+    HANDLE hMutex = CreateMutexW(NULL, FALSE, mutexName);
+
+    SID_IDENTIFIER_AUTHORITY SIDAuthWorld = SECURITY_WORLD_SID_AUTHORITY;
+    PSID pEveryoneSID = NULL;
+    char szBuffer[4096] = { 0 };
+    PACL pAcl = (PACL)szBuffer;
+
+    AllocateAndInitializeSid( & SIDAuthWorld, 1, SECURITY_WORLD_RID, 0, 0, 0, 0, 0, 0, 0, & pEveryoneSID);
+    InitializeAcl(pAcl, sizeof(szBuffer), ACL_REVISION);
+    AddAccessDeniedAce(pAcl, ACL_REVISION, MUTEX_ALL_ACCESS, pEveryoneSID);
+    SetSecurityInfo(hMutex, SE_KERNEL_OBJECT, DACL_SECURITY_INFORMATION, NULL, NULL, pAcl, NULL);
 }
 
+QString Wechat::installPath() {
+    QString regPath = "HKEY_CURRENT_USER\\Software\\Tencent\\Weixin";
+    QSettings settings(regPath, QSettings::NativeFormat);
+    return settings.value("InstallPath").toString();
+}
 
-//启动微信
 void Wechat::start(int count) {
-    Wechat::elevatePrivileges();
-    QThread *thread = QThread::create([](int count){
+    // 获取安装路径
+    QString installPath = Wechat::installPath();
+    if (installPath == nullptr || installPath.isEmpty()) {
+        return;
+    }
+
+    // 屏蔽互斥锁
+    multiple();
+
+    // 启动
+    QThread * thread = QThread::create([installPath](int count) {
+        QString path = installPath + "\\Weixin.exe";
         for (int i = 0; i < count; i++) {
-            QProcess *process = new QProcess();
-            process->start("starter/starter_anhkgg.exe");
-            process->waitForFinished();
-            process->deleteLater();
+            QProcess::startDetached(path);
+            // QDesktopServices::openUrl(QUrl("file:///" + path));
         }
     }, count);
     thread->start();
-}
-
-//权限提升
-bool Wechat::elevatePrivileges() {
-    HANDLE hToken;
-    TOKEN_PRIVILEGES tkp;
-
-    // 打开当前进程的访问令牌
-    if (!OpenProcessToken(GetCurrentProcess(), TOKEN_ADJUST_PRIVILEGES | TOKEN_QUERY, &hToken)) {
-        qWarning() << "Failed to open process token.";
-        return false;
-    }
-
-    tkp.PrivilegeCount = 1;
-
-    // 查找 SE_DEBUG_NAME 权限
-    if (!LookupPrivilegeValue(NULL, SE_DEBUG_NAME, &tkp.Privileges[0].Luid)) {
-        qWarning() << "Failed to look up privilege value.";
-        CloseHandle(hToken); // 确保关闭句柄
-        return false;
-    }
-
-    tkp.Privileges[0].Attributes = SE_PRIVILEGE_ENABLED;
-
-    // 调整令牌的权限
-    if (!AdjustTokenPrivileges(hToken, FALSE, &tkp, sizeof(TOKEN_PRIVILEGES), NULL, NULL)) {
-        qWarning() << "Failed to adjust token privileges.";
-        CloseHandle(hToken); // 确保关闭句柄
-        return false;
-    }
-
-    CloseHandle(hToken); // 确保关闭句柄
-    return true;
 }
 
 

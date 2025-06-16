@@ -3,12 +3,15 @@
 
 CarrierSlot::CarrierSlot(QString uuid, HWND hwnd, QWidget *parent) : QWidget{parent}, uuid(uuid), hwnd(hwnd) {
     GetWindowRect(hwnd, &rect);
-    SetParent(hwnd, (HWND) this->winId());
     this->winStyle = GetWindowLong(hwnd, GWL_STYLE);
     this->winExStyle = GetWindowLong(hwnd, GWL_EXSTYLE);
 
     this->window = QWindow::fromWinId((WId) hwnd);
+    this->blocker = new EventBlocker;
+    this->window->installEventFilter(this->blocker);
     this->widget = QWidget::createWindowContainer(this->window, this);
+    this->widget->winId(); // 调用winId方法使得wechat变成native窗口,否则会以wxp为父节点而不是slot
+
     QVBoxLayout* layout = new QVBoxLayout(this);
     layout->setObjectName("CarrierSlotLayout" + uuid);
     layout->setContentsMargins(0, 0, 0, 0);
@@ -26,14 +29,10 @@ QWidget *CarrierSlot::getWidget() {
 
 void CarrierSlot::showSlot() {
     this->setVisible(true);
-    this->widget->setVisible(true);
-    this->window->setVisible(true);
 }
 
 void CarrierSlot::hideSlot() {
     this->setVisible(false);
-    this->widget->setVisible(false);
-    this->window->setVisible(false);
 }
 
 void CarrierSlot::clear() {
@@ -41,13 +40,13 @@ void CarrierSlot::clear() {
     this->widget->setParent(nullptr);
     this->window->setParent(nullptr);
 
-    SetParent(this->hwnd, GetDesktopWindow());
+    // SetParent(this->hwnd, GetDesktopWindow());
     SetWindowLongPtr(this->hwnd, GWL_STYLE, this->winStyle);
     SetWindowLongPtr(this->hwnd, GWL_EXSTYLE, this->winExStyle);
     SetWindowPos(
         hwnd, nullptr, rect.left, rect.top,
         rect.right - rect.left, rect.bottom - rect.top,
-        SWP_NOREDRAW | SWP_HIDEWINDOW
+        SWP_NOREDRAW
     );
-    ShowWindow(hwnd, SW_HIDE);
+    // ShowWindow(hwnd, SW_HIDE);
 }

@@ -7,13 +7,13 @@
     <x>0</x>
     <y>0</y>
     <width>1060</width>
-    <height>600</height>
+    <height>750</height>
    </rect>
   </property>
   <property name="minimumSize">
    <size>
     <width>1060</width>
-    <height>0</height>
+    <height>750</height>
    </size>
   </property>
   <property name="maximumSize">
@@ -33,7 +33,7 @@
    <property name="minimumSize">
     <size>
      <width>1060</width>
-     <height>640</height>
+     <height>650</height>
     </size>
    </property>
   </widget>

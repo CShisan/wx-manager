@@ -51,6 +51,6 @@ RESOURCES += resources.qrc
 
 RC_ICONS = bubbles.ico
 
-copy_files.files = $$PWD/starter
-copy_files.path = $$OUT_PWD
-COPIES += copy_files
+# copy_files.files = $$PWD/starter
+# copy_files.path = $$OUT_PWD
+# COPIES += copy_files

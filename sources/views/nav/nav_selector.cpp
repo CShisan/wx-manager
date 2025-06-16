@@ -52,9 +52,9 @@ bool NavSelector::isWechatWindow(HWND hwnd) {
     if (IsWindow(hwnd)) {
         const int classNameSize = 256;
         TCHAR classNameArray[classNameSize];
-        if (GetClassName(hwnd, classNameArray, classNameSize) > 0) {
-            QString className = QString::fromWCharArray(classNameArray);
-            return className.contains("wechat", Qt::CaseInsensitive);
+        if (GetWindowText(hwnd, classNameArray, classNameSize) > 0) {
+            QString title = QString::fromWCharArray(classNameArray);
+            return title.compare("微信") == 0;
         }
     }
     return false;

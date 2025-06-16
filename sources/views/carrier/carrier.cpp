@@ -51,6 +51,6 @@ void Carrier::slot_clear_cslot(QString uuid) {
 }
 
 void Carrier::refresh() {
-    this->setVisible(false);
-    this->setVisible(true);
+    // this->setVisible(false);
+    // this->setVisible(true);
 }

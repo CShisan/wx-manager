@@ -5,12 +5,13 @@
 
 class Wechat : public QObject {
     Q_OBJECT
-public:
-    explicit Wechat(QObject *parent = nullptr);
+    public:
+    explicit Wechat(QObject * parent = nullptr);
     static void start(int count);
 
-private:
-    static bool elevatePrivileges();
+    private:
+    static void multiple();
+    static QString installPath();
 };
 
 #endif // WECHAT_H
